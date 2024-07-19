@@ -1,4 +1,5 @@
 import mido
+# data pulled from https://github.com/pencilresearch/midi/blob/main/Elektron/Rytm%20MKII.csv 
 
 #port = mido.open_output('Port Name')
 port = mido.open_output(name='foo', virtual=True)
@@ -55,4 +56,5 @@ bd_sharp = {
     "cc lsb" : [0, 0, 0, 0, 0, 0, 0, 0],
     "nprn msb" : [1, 1, 1, 1, 1, 1, 1, 1]
 }
+
 print(bd_sharp["cc msb"])
