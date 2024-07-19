@@ -1,14 +1,46 @@
 import mido
+from midi_play import lpd8_vote
+import pandas as pd
+
 # data pulled from https://github.com/pencilresearch/midi/blob/main/Elektron/Rytm%20MKII.csv 
 
 #port = mido.open_output('Port Name')
 port = mido.open_output(name='foo', virtual=True)
 #print(port)
-msg = mido.Message('note_on', note=60)
-#print(msg)
-port.send(msg)
 
-print(mido.get_input_names())
+def get_cc_lookup(section):
+    rdf = pd.read_csv("Rytm MKII.csv")
+    cc_vals = {}
+    for i, j in rdf[rdf['section']==section].iterrows():
+        print('section', section)
+        print('param', j['parameter_name'])
+        print('cc_msb', j['cc_msb'])
+        print('cc_min', j['cc_min_value'])
+        print('cc_min', j['cc_max_value'])
+
+def send_cc(channel=9, cc=1, value=122, time=0):
+    #msg = mido.Message('note_on', note=60)
+    msg = mido.Message(type='control_change', channel=channel, control=cc, value=value, time=time)
+    #mido.Message('control_change', note=60)
+    print(msg)
+    #port.send(msg)
+    
+
+for i in range(0,3):
+    vote = lpd8_vote()
+    send_cc(3,4,vote,0)
+
+
+sections = [
+"Trig",
+"Kit",
+"Sample",
+"Filter",
+"Amp",
+"LFO"
+]
+
+get_cc_lookup(sections[0])
 
 synths = [
 "Synth, BD plastic",
@@ -40,6 +72,8 @@ synths = [
 "Synth, impulse"
 ]
 
+print(synths[1])
+get_cc_lookup(synths[1])
 
 
 bd_sharp = {
@@ -57,4 +91,3 @@ bd_sharp = {
     "nprn msb" : [1, 1, 1, 1, 1, 1, 1, 1]
 }
 
-print(bd_sharp["cc msb"])
