@@ -54,13 +54,13 @@ def encode_individual(params):
     return np.concatenate([np.array(list(f'{param:07b}'), dtype=int) for param in params])
 
 def fit_conditions():
-    print("Needs to be an integer between 1-9.")
+    print("Needs to be an integer between 1-8.")
 
 def fitness1(individual):
     got_info = False
     try:
-        fit_value = int(input("Please rate the pad between 1-9: "))
-        if (fit_value > 0 and fit_value <= 10):
+        fit_value = int(input("Please rate the pad between 1-8: "))
+        if (fit_value > 0 and fit_value <= 9):
             got_info = True
         else:
             fit_conditions()
