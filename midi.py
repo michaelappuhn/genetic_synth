@@ -1,15 +1,14 @@
 import mido
-#from midi_play import lpd8_vote
+from midi_play import vote, get_lpd8_port
 import pandas as pd
 
 
 # data pulled from https://github.com/pencilresearch/midi/blob/main/Elektron/Rytm%20MKII.csv 
 
 #port = mido.open_output('Port Name')
-port = mido.open_output(name='foo', virtual=True)
 #print(port)
+outport = mido.open_output(name='foo', virtual=True)
 rdf = pd.read_csv("Rytm MKII.csv")
-
 
 
 sections = [
@@ -65,28 +64,33 @@ def get_cc_lookup(section):
                 'cc_min': j['cc_max_value']
             }
         )
-    print(cc_vals)
+    return cc_vals
 
 
-def send_cc(channel=9, cc=1, value=122, time=0):
+def send_cc(channel=1, cc=1, value=122, time=0):
     #msg = mido.Message('note_on', note=60)
-    msg = mido.Message(type='control_change', channel=channel, control=cc, value=value, time=time)
     #mido.Message('control_change', note=60)
-    print(msg)
     #port.send(msg)
-    
+    msg = mido.Message(type='control_change', channel=channel, control=cc, value=value, time=time)
+    print(msg)
+
 def main():
-    """
+    inport = get_lpd8_port()
+
     for i in range(0,3):
-        vote = lpd8_vote()
-        #send_cc(3,4,vote,0)
-        print(vote)
-    """
+        vote_out = vote(inport)
+        print(vote_out)
+        send_cc(1,4,vote_out,0)
 
     for i in range(0, len(sections)):
-        get_cc_lookup(sections[i])
-    print(synths[1])
-    get_cc_lookup(synths[1])
+        print(get_cc_lookup(sections[i]))
 
+
+    for i in range(0, 6):
+        print("---")
+        print(synths[i])
+        print(get_cc_lookup(synths[i]))
+
+    return True
 
 main()

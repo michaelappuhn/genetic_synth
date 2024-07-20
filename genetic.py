@@ -1,7 +1,10 @@
 import numpy as np
 import sys
+from midi_play import vote, get_lpd8_port
 
 def main():
+    inport = get_lpd8_port()
+
     # Parameters
     pop_size = 3
     num_params = 7  # [frequency, timbre1, timbre2, attack, decay, sustain, noise]
