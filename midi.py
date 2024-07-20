@@ -10,13 +10,19 @@ port = mido.open_output(name='foo', virtual=True)
 
 def get_cc_lookup(section):
     rdf = pd.read_csv("Rytm MKII.csv")
-    cc_vals = {}
+    cc_vals = []
     for i, j in rdf[rdf['section']==section].iterrows():
-        print('section', section)
-        print('param', j['parameter_name'])
-        print('cc_msb', j['cc_msb'])
-        print('cc_min', j['cc_min_value'])
-        print('cc_min', j['cc_max_value'])
+        cc_vals.append(
+            {
+                'section': section,
+                'param': j['parameter_name'],
+                'cc_msb': j['cc_msb'],
+                'cc_min': j['cc_min_value'],
+                'cc_min': j['cc_max_value']
+            }
+        )
+    print(cc_vals)
+
 
 def send_cc(channel=9, cc=1, value=122, time=0):
     #msg = mido.Message('note_on', note=60)
@@ -75,19 +81,4 @@ synths = [
 print(synths[1])
 get_cc_lookup(synths[1])
 
-
-bd_sharp = {
-    "parameters" : [
-            "level", 
-            'tune', 
-            'decay', 
-            'sweep depth', 
-            "sweep time", 
-            "hold time", 
-            "tick level"
-    ], 
-    "cc msb" : [16, 17, 18, 19, 20, 21, 22, 23],
-    "cc lsb" : [0, 0, 0, 0, 0, 0, 0, 0],
-    "nprn msb" : [1, 1, 1, 1, 1, 1, 1, 1]
-}
 
