@@ -22,39 +22,40 @@ sections = [
 ]
 
 avail_machines_by_channel = [
-    False,
     [0,1,2,3,4,5]
 ]
 
 
 synths = [
-    "Synth, BD plastic",
-    "Synth, BD sharp",
     "Synth, BD hard",
     "Synth, BD classic",
-    "Synth, BD FM",
-    "Synth, BD silky",
-    "Synth, SD natural",
     "Synth, SD hard",
     "Synth, SD classic",
-    "Synth, SD FM",
     "Synth, RS hard",
     "Synth, RS classic",
     "Synth, CP classic",
-    "Synth, Dual VCO",
     "Synth, BT classic",
     "Synth, LT, MT, HT classic",
     "Synth, CH classic",
-    "Synth, CH metallic",
     "Synth, OH classic",
-    "Synth, OH metallic",
-    "Synth, HH basic",
-    "Synth, CY metallic",
     "Synth, CY classic",
-    "Synth, CY ride",
     "Synth, CB classic and metallic",
+    "Synth, BD FM",
+    "Synth, SD FM",
     "Synth, noise",
     "Synth, impulse"
+    "Synth, CH metallic",
+    "Synth, OH metallic",
+    "Synth, CY metallic",
+    "Synth, CB classic and metallic",
+    "Synth, BD plastic",
+    "Synth, BD silky",
+    "Synth, SD natural",
+    "Synth, HH basic",
+    "Synth, CY ride",
+    "Synth, BD sharp",
+    "",
+    "Synth, Dual VCO",
 ]
 
 def get_cc_lookup(section):
@@ -123,4 +124,4 @@ def main():
 
     return True
 
-main()
+#main()
