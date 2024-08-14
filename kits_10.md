@@ -2,20 +2,20 @@ Channel 1 (0), 2 (1)
 1 - bd classic
 2 - sd hard
 3 - sd classic
-13 - bd fm
-14 - sd fm
-15 - ut noise
-16 - ut impulse
-21 - bd plastic
-22 - bd silky
-23 - sd natural
-26 - bd sharp
-27 - disable
-28 - sy dual vco
-29 - sy chip
-30 - bd acoustic
-31 - sd acoustic
-32 - sy raw
+14 - bd fm
+15 - sd fm
+16 - ut noise
+17 - ut impulse
+22 - bd plastic
+23 - bd silky
+24 - sd natural
+27 - bd sharp
+28 - disable
+29 - sy dual vco
+30 - sy chip
+31 - bd acoustic
+32 - sd acoustic
+33 - sy raw
 
 
 Channel 3 (4), 4 (3)
@@ -27,56 +27,56 @@ Channel 3 (4), 4 (3)
 4 - rs hard
 5 - rs classic
 6 - cp classic
-13 - bd fm
-14 - sd fm
-15 - ut noise
-16 - ut impulse
-21 - bd plastic
-22 - bd silky
-23 - sd natural
-26 - bd sharp
-27 - disable
-28 - sy dual vco
-29 - chip
-30 - bd acoustic
-31 - sd acoustic
-32 - sy raw
+14 - bd fm
+15 - sd fm
+16 - ut noise
+17 - ut impulse
+22 - bd plastic
+23 - bd silky
+24 - sd natural
+27 - bd sharp
+28 - disable
+29 - sy dual vco
+30 - sy chip
+31 - bd acoustic
+32 - sd acoustic
+33 - sy raw
 
 
 Channel 5 (4)
-7 - bt classic
-15 - ut noise
-16 - ut impulse
+8 - bt classic
+16 - ut noise
+17 - ut impulse
 27 - disable
 
 
 Channel 6 (5), 7 (6), 8 (7)
-8 - xt classic
-15 - ut noise
-16 - ut impulse
+9 - xt classic
+16 - ut noise
+17 - ut impulse
 27 - disable
 
 
 Channel 9 (8), 10 (9)
-9 - ch classic
-10 - oh classic
-15 - ut noise
-16 - ut impulse
-17 - ch metallic
-18 - oh metallic
-24 - hh basic
+10 - ch classic
+11 - oh classic
+16 - ut noise
+17 - ut impulse
+18 - ch metallic
+19 - oh metallic
+25 - hh basic
 27 - disable
 33 - hh lab
 
 
 
 Channel 11 (10), 12 (11)
-11 -  cy classic
-12 -  cb classic
-15 - ut noise
-16 - ut impulse
-19 -  cy metallic
-20 -  cb metallic
-25 -  cy ride
+12 -  cy classic
+13 -  cb classic
+16 - ut noise
+17 - ut impulse
+20 -  cy metallic
+21 -  cb metallic
+26 -  cy ride
 27 -  disable
 
