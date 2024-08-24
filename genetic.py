@@ -1,6 +1,6 @@
 import numpy as np
 import sys
-from midi_play import vote, get_lpd8_port
+from voter import vote, get_lpd8_port
 
 def main():
     inport = get_lpd8_port()

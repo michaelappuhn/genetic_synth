@@ -1,5 +1,5 @@
 import mido
-from midi_play import vote, get_lpd8_port
+from voter import vote, get_lpd8_port
 import pandas as pd
 from random import randint
 
