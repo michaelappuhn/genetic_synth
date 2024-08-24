@@ -9,16 +9,17 @@ from random import randint
 outport = mido.open_output('Elektron Analog Rytm MKII')
 #print(port)
 #outport = mido.open_output(name='foo', virtual=True)
-rdf = pd.read_csv("Rytm MKII.csv")
+#rdf = pd.read_csv("Rytm MKII.csv")
+rdf = pd.read_csv("rytm-limited.csv")
 
 
 sections = [
-"Trig",
-#"Kit",
-#"Sample",
-"Filter",
-"Amp",
-"LFO"
+    "Trig",
+    #"Kit",
+    #"Sample",
+    "Filter",
+    "Amp",
+    "LFO"
 ]
 
 avail_machines_by_channel = [
@@ -135,4 +136,4 @@ def main():
 
     return True
 
-#main()
+main()
