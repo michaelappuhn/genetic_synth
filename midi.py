@@ -15,26 +15,11 @@ rdf = pd.read_csv("rytm-limited.csv")
 
 sections = [
     "Trig",
-    #"Kit",
+    "Kit",
     #"Sample",
     "Filter",
     "Amp",
     "LFO"
-]
-
-avail_machines_by_channel = [
-    [0, 13, 21, 22, 26],
-    [0, 1, 2, 13, 14, 15, 16, 21, 22, 26, 28],
-    [0, 1, 2, 3, 4, 5, 13, 14, 15, 16, 21, 22, 26, 28],
-    [0, 1, 2, 3, 4, 5, 13, 14, 15, 16, 21, 22, 26, 28],
-    [7, 15, 16],
-    [8, 15, 16],
-    [8, 15, 16],
-    [8, 15, 16],
-    [9, 10, 15, 16, 17, 18, 24],
-    [9, 10, 15, 16, 17, 18, 24],
-    [11, 12, 16, 17, 19, 20, 25],
-    [11, 12, 16, 17, 19, 20, 25],
 ]
 
 
@@ -69,6 +54,24 @@ synths = [
     "",
     "Synth, Dual VCO",
 ]
+
+def choose_random_machine(channel):
+    avail_machines_by_channel = [
+        [0, 13, 21, 22, 26],
+        [0, 1, 2, 13, 14, 15, 16, 21, 22, 26, 28],
+        [0, 1, 2, 3, 4, 5, 13, 14, 15, 16, 21, 22, 26, 28],
+        [0, 1, 2, 3, 4, 5, 13, 14, 15, 16, 21, 22, 26, 28],
+        [7, 15, 16],
+        [8, 15, 16],
+        [8, 15, 16],
+        [8, 15, 16],
+        [9, 10, 15, 16, 17, 18, 24],
+        [9, 10, 15, 16, 17, 18, 24],
+        [11, 12, 16, 17, 19, 20, 25],
+        [11, 12, 16, 17, 19, 20, 25],
+    ]
+
+   
 
 def get_cc_lookup(section):
     cc_vals = []
@@ -123,16 +126,15 @@ def main():
     for synth_param in get_cc_lookup(synths[i]):
         send_val = generate_values(0,127)
         print(synth_param['param'], "CC:", synth_param['cc_msb'], send_val)
-        send_cc(outport, 10, synth_param['cc_msb'], send_val, 0)
+        send_cc(outport, 12, synth_param['cc_msb'], send_val, 0)
 
     print(mido.get_output_names())
-    """
+    
     for i in range(0, 6):
         print("---")
         print(synths[i])
         for synth_param in get_cc_lookup(synths[i]):
             print(synth_param['param'], "CC:", synth_param['cc_msb'])
-    """
 
     return True
 
