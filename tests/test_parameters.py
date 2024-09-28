@@ -5,8 +5,10 @@ p1 = Parameter(1)
 p2 = Parameter(2, 120)
 p3 = Parameter(3, 59, 50)
 p4 = Parameter(4, 60, 51, 100)
-p5 = Parameter(4, 40, 52, 101)
-p6 = Parameter(4, 120, 52, 102)
+p5 = Parameter(5, 40, 52, 101)
+p6 = Parameter(6, 120, 52, 102)
+p7 = Parameter(7, 110, 52, 102)
+p8 = Parameter(8, 30, 12, 102)
 
 class TestParameter(TestCase):
 
@@ -15,6 +17,8 @@ class TestParameter(TestCase):
         self.assertEqual(p2.cc, 2)
         self.assertEqual(p3.cc, 3)
         self.assertEqual(p4.cc, 4)
+        self.assertEqual(p5.cc, 5)
+        self.assertEqual(p6.cc, 6)
 
     def test_default(self):
         # p
@@ -41,6 +45,15 @@ class TestParameter(TestCase):
 
     def test_val_max_change(self):
         self.assertEqual(p4.value_max, 100)
+
+    def test_random(self):
+        p7.generate_random_value()
+        self.assertNotEqual(p7.value, 110)
+
+    def test_value_set(self):
+        p8.set_value(20)
+        self.assertEqual(p8.value, 20)
+
 
     def test_out_of_bounds(self):
         # if a value is below the min, increase to the min

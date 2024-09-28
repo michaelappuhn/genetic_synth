@@ -11,6 +11,7 @@ class Parameter():
         self.value = value
         self.value_min = value_min
         self.value_max = value_max
+        self._check_value_bounds()
         self.name = name
 
     def generate_random_value(self):
@@ -19,6 +20,13 @@ class Parameter():
 
     def set_value(self, val):
         self.value = val
+
+    def _check_value_bounds(self):
+        if (self.value < self.value_min):
+            self.set_value(self.value_min)
+        elif (self.value > self.value_max):
+            self.set_value(self.value_max)
+        
 
 
 class ParameterCollection():
