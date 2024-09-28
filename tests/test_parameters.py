@@ -1,5 +1,5 @@
 from unittest import TestCase
-from synthesizer.parameters import Parameter
+from synthesizer.parameters import Parameter, ParameterCollection
 
 p1 = Parameter(1)
 p2 = Parameter(2, 120)
@@ -12,7 +12,7 @@ p8 = Parameter(8, 30, 12, 102)
 
 class TestParameter(TestCase):
 
-    def test_cc_change(self):
+    def test_cc_set(self):
         self.assertEqual(p1.cc, 1)
         self.assertEqual(p2.cc, 2)
         self.assertEqual(p3.cc, 3)
@@ -62,7 +62,8 @@ class TestParameter(TestCase):
         # if a value is above the max, decrease to the max
         self.assertEqual(p6.value, 102)
 
-"""
+
+
 # Tester
 param_collect = ParameterCollection()
 
@@ -71,24 +72,9 @@ for i in range(0,20):
     p.generate_random_value()
     param_collect.add_parameter(p)
 
-for p in param_collect.params:
-    print (p.cc, p.value)
-"""
+class TestParameterCollection(TestCase):
+    def test_add_parameter(self):
+        param_collect.add_parameter(p1)
+        self.assertEqual(len(param_collect.params), 21)
+        self.assertEqual(param_collect.params[-1].cc, 1)
 
-"""
-class Parameter():
-    def __init__(self, cc: int, value: int = 127, value_min: int = 0, value_max: int = 127, name='n/a', ):
-        self.cc = cc
-        self.value = value
-        self.value_min = value_min
-        self.value_max = value_max
-        self.name = name
-
-    def generate_random_value(self):
-        val = randint(self.value_min, self.value_max)
-        self.set_value(val)
-
-    def set_value(self, val):
-        self.value = val
-
-"""
