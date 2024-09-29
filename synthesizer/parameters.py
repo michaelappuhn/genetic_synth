@@ -32,10 +32,10 @@ class Parameter():
             self.set_value(self.value_max)
         
     def __str__(self):
-        return f'cc: {self.cc}, value: {self.value}'
+        return f'name:{self.name}. cc:{self.cc}. value:{self.value}'
 
     def __repr__(self):
-        return f'Parameter - cc: {self.cc}, value: {self.value}'
+        return f'Parameter: name:{self.name}. cc:{self.cc}. value:{self.value}'
 
 class ParameterCollection(UserList):
 # https://docs.python.org/3/library/collections.html#collections.UserList
@@ -76,17 +76,43 @@ class ParameterCSVReader(UserList):
         self._set_df()
         for row, data in self._df.iterrows():
             self.data.append(data.to_dict())
+        self.set_parameter_collection()
+
+    def set_parameter_collection(self):
+        pc = ParameterCollection()
+        for row in self:
+            param = Parameter(row['cc_msb'], row['cc_max_value'], row['cc_min_value'], row['cc_max_value'], row['parameter_name'])
+            pc.add_parameter(param)
+        self.parameter_collection = pc
 
     def get_parameter_collection(self):
-        pass
+        return self.parameter_collection
+
+    def get_random_parameter_collection(self):
+        for param in self.parameter_collection:
+            param.generate_random_value()
+        return self.parameter_collection
 
 
 
 class AnalogRytmParameterCSVReader(ParameterCSVReader):
-    def __init__(self, csv_file_path):
-        super().__init__(self)
-        self._df = pd.read_csv("synthesizer/rytm-limited.csv")
-        self.csv_file_path = csv_file_path
+    def __init__(self):
+        csv_file_path = "synthesizer/rytm-limited.csv"
+        super().__init__(csv_file_path)
         self.read_csv()
 
+    def read_csv(self):
+        self._set_df()
+        self._isolate_df()
+        for row, data in self._df.iterrows():
+            self.data.append(data.to_dict())
+        self.set_parameter_collection()
 
+    def _isolate_df(self):
+        sections = [
+            "Synth, general",
+            "Filter",
+            "Amp",
+            "LFO"
+        ]
+        self._df = self._df[self._df['section'].isin(sections)]

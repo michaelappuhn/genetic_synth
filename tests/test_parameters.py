@@ -1,5 +1,5 @@
 from unittest import TestCase
-from synthesizer.parameters import Parameter, ParameterCollection, ParameterCSVReader
+from synthesizer.parameters import Parameter, ParameterCollection, ParameterCSVReader, AnalogRytmParameterCSVReader
 
 p1 = Parameter(1)
 p2 = Parameter(2, 120)
@@ -64,40 +64,66 @@ class TestParameter(TestCase):
 
 
 
-# Tester
-param_collect = ParameterCollection()
-
-for i in range(0,20):
-    p =Parameter(i+1,i+1)
-    param_collect.add_parameter(p)
-
 class TestParameterCollection(TestCase):
+    def setUp(self):
+        self.pc = ParameterCollection()
+
+        for i in range(0,20):
+            p = Parameter(i+1,i+1)
+            self.pc.add_parameter(p)
+
+       
     def test_has_parameters(self):
         #self.assertIsInstance(param_collect.params[0], Parameter)
-        self.assertIsInstance(param_collect[0], Parameter)
+        self.assertIsInstance(self.pc[0], Parameter)
 
     def test_add_parameter(self):
-        param_collect.add_parameter(p1)
-        #self.assertEqual(len(param_collect.params), 21)
-        self.assertEqual(len(param_collect), 21)
-        #self.assertEqual(param_collect[-1].cc, 1)
+        self.pc.add_parameter(p1)
+        #self.assertEqual(len(self.pc.params), 21)
+        self.assertEqual(len(self.pc), 21)
+        #self.assertEqual(self.pc[-1].cc, 1)
 
     def test_iteration(self):
-        for i in range(0, len(param_collect)):
-            self.assertIsInstance(param_collect[i], Parameter)
-        self.assertEqual(param_collect[2].cc, 3)
+        for i in range(0, len(self.pc)):
+            self.assertIsInstance(self.pc[i], Parameter)
+        self.assertEqual(self.pc[2].cc, 3)
 
 
-pcsv = ParameterCSVReader("synthesizer/rytm-limited.csv")
 
 class TestParameterCSVReader(TestCase):
+
+    def setUp(self):
+        self.pcsv = ParameterCSVReader("synthesizer/rytm-limited.csv")
+        
     def test_csv_load(self):
         #print(pcsv._df)
-        self.assertEqual(pcsv[0]['cc_msb'], 15)
+        self.assertEqual(self.pcsv[0]['cc_msb'], 15)
 
     def test_get_parameter_collection(self):
-        self.assertIsInstance(pcsv.get_parameter_collection(), ParameterCollection)
-        
-        
+        self.assertIsInstance(self.pcsv.get_parameter_collection(), ParameterCollection)
+        self.assertEqual(self.pcsv.get_parameter_collection()[0].cc, 15)
+
+    def test_get_random_parameter_collection(self):
+        self.assertIsInstance(self.pcsv.get_random_parameter_collection(), ParameterCollection)
+        self.assertNotEqual(self.pcsv.get_parameter_collection()[1].value, self.pcsv.get_parameter_collection()[1].value_max)
+        print(self.pcsv.get_parameter_collection()[1].value)
+
+class TestAnalogRytmParameterCSVReader(TestCase):
+
+    def setUp(self):
+        self.pcsv = AnalogRytmParameterCSVReader()
+ 
+    def test_csv_load(self):
+        #print(self.pcsv._df)
+        self.assertEqual(self.pcsv[0]['cc_msb'], 16)
+
+    def test_get_parameter_collection(self):
+        self.assertIsInstance(self.pcsv.get_parameter_collection(), ParameterCollection)
+        self.assertEqual(self.pcsv.get_parameter_collection()[0].cc, 16)
+
+    def test_get_random_parameter_collection(self):
+        self.assertIsInstance(self.pcsv.get_random_parameter_collection(), ParameterCollection)
+        self.assertNotEqual(self.pcsv.get_parameter_collection()[1].value, self.pcsv.get_parameter_collection()[1].value_max)
+        print(self.pcsv.get_parameter_collection()[1].value)
 
 
