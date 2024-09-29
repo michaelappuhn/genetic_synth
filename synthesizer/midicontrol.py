@@ -2,40 +2,72 @@ import mido
 from random import randint, seed
 from time import time
 
-from parameters import ParameterCollection, Parameter
+from synthesizer.parameters import ParameterCollection, Parameter
 
 seed(time())
 
 #inport = get_lpd8_port()
 
 class MidiConnection():
-    def __init__(self):
+    def __init__(self, outport_name):
         # todo generalize
-        outport = mido.open_output('Elektron Analog Rytm MKII')
+        self.outport_name = outport_name
+        self.connect()
+        #outport = mido.open_output('Elektron Analog Rytm MKII')
         pass
 
-class MidiMessage():
-    def __init__(self, midi_connect:MidiConnection, channel):
-        self.midi_connect = midi_connect
+    def give_instructions():
+        pass
 
-    def send_message(self):
-        #not_msg = mido.Message('note_on', note=60)
-        self.midi_connect.outport.send(self.msg)
+    def connect(self):
+        ins = mido.get_output_names()
+        if (self.outport_name in ins):
+            port = mido.open_output(self.outport_name)
+            print(f'Outport "{self.outport_name}" is connected.')
+            self.is_connected = True
+            self.port = port
+        else:
+            self.is_connected = False
+            self.message_failure()
+
+
+    def message_failure(self):
+        print(f'Outport "{self.outport_name}" not connected.')
+
+    def check_is_connected(self):
+        if (self.is_connected != False):
+            return True
+        else: return False
+
+
+    def __str__(self):
+        return outport.name
+
+class MidiMessage():
+    def __init__(self, midi_connect:MidiConnection, channel, msg:mido.Message = mido.Message('note_on', note=60)):
+        self.midi_connect = midi_connect
+        #self.msg = mido.Message('note_on', note=60)
+        self.channel = channel
+        msg.channel = channel
+        self.msg = msg
+
+    def send(self):
+        self.midi_connect.port.send(self.msg)
         print(self.msg)
 
 
 class MidiCCMessage(MidiMessage):
     def __init__(self, midi_connect: MidiConnection, channel, param: Parameter):
         self.midi_connect = midi_connect
-        self.channel = midi_connect.channel
+        self.channel = channel
         self.param = param
         self.construct_cc()
 
     def construct_cc(self):
-        cc = param.cc
-        value = param.value
+        self.cc = self.param.cc
+        self.value = self.param.value
         time = 0
-        self.msg = mido.Message(type='control_change', channel=channel, control=cc, value=value, time=time)
+        self.msg = mido.Message(type='control_change', channel=self.channel, control=self.cc, value=self.value, time=time)
 
 
 class MidiMessageCollectionSender():
@@ -108,6 +140,7 @@ class AnalogRytmMachineSelector():
 
 def main():
 
+    """
     chan:int = int(input("Channel? "))
     #mach:int = int(input("Machine? "))
     
@@ -117,7 +150,6 @@ def main():
 
     #print("outputs:", mido.get_output_names())
 
-    """
     for i in range(0,3):
         vote_out = vote(inport)
         print(vote_out)
