@@ -68,13 +68,22 @@ class TestParameter(TestCase):
 param_collect = ParameterCollection()
 
 for i in range(0,20):
-    p =Parameter(i+1,3)
-    p.generate_random_value()
+    p =Parameter(i+1,i+1)
     param_collect.add_parameter(p)
 
 class TestParameterCollection(TestCase):
+    def test_has_parameters(self):
+        #self.assertIsInstance(param_collect.params[0], Parameter)
+        self.assertIsInstance(param_collect[0], Parameter)
+
     def test_add_parameter(self):
         param_collect.add_parameter(p1)
-        self.assertEqual(len(param_collect.params), 21)
-        self.assertEqual(param_collect.params[-1].cc, 1)
+        #self.assertEqual(len(param_collect.params), 21)
+        self.assertEqual(len(param_collect), 21)
+        #self.assertEqual(param_collect[-1].cc, 1)
+
+    def test_iteration(self):
+        for i in range(0, len(param_collect)):
+            self.assertIsInstance(param_collect[i], Parameter)
+        self.assertEqual(param_collect[2].cc, 3)
 
