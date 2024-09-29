@@ -65,7 +65,6 @@ class ParameterCollection(UserList):
 class ParameterCSVReader(UserList):
     def __init__(self, csv_file_path):
         super().__init__(self)
-        #self._df = pd.read_csv("synthesizer/rytm-limited.csv")
         self.csv_file_path = csv_file_path
         self.read_csv()
 
@@ -80,4 +79,14 @@ class ParameterCSVReader(UserList):
 
     def get_parameter_collection(self):
         pass
+
+
+
+class AnalogRytmParameterCSVReader(ParameterCSVReader):
+    def __init__(self, csv_file_path):
+        super().__init__(self)
+        self._df = pd.read_csv("synthesizer/rytm-limited.csv")
+        self.csv_file_path = csv_file_path
+        self.read_csv()
+
 
