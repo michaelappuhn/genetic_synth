@@ -1,5 +1,5 @@
 from unittest import TestCase
-from synthesizer.parameters import Parameter, ParameterCollection
+from synthesizer.parameters import Parameter, ParameterCollection, ParameterCSVReader
 
 p1 = Parameter(1)
 p2 = Parameter(2, 120)
@@ -86,4 +86,18 @@ class TestParameterCollection(TestCase):
         for i in range(0, len(param_collect)):
             self.assertIsInstance(param_collect[i], Parameter)
         self.assertEqual(param_collect[2].cc, 3)
+
+
+pcsv = ParameterCSVReader("synthesizer/rytm-limited.csv")
+
+class TestParameterCSVReader(TestCase):
+    def test_csv_load(self):
+        #print(pcsv._df)
+        self.assertEqual(pcsv[0]['cc_msb'], 15)
+
+    def test_get_parameter_collection(self):
+        self.assertIsInstance(pcsv.get_parameter_collection(), ParameterCollection)
+        
+        
+
 

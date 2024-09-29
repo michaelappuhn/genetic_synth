@@ -1,7 +1,8 @@
 from random import seed, randint
 from time import time
 from typing import List
-from collections import UserList
+from collections import UserList, UserDict
+import pandas as pd
 
 seed(time())
 #seed(100)
@@ -61,9 +62,22 @@ class ParameterCollection(UserList):
 
 
 
-class ParameterCSVReader:
-    def __init__(self, csv_file):
+class ParameterCSVReader(UserList):
+    def __init__(self, csv_file_path):
+        super().__init__(self)
+        #self._df = pd.read_csv("synthesizer/rytm-limited.csv")
+        self.csv_file_path = csv_file_path
+        self.read_csv()
+
+    def _set_df(self):
+        self._df = pd.read_csv(self.csv_file_path)
+        self._df = self._df[['parameter_name', 'cc_msb', 'cc_min_value', 'cc_max_value', 'section']]
+
+    def read_csv(self):
+        self._set_df()
+        for row, data in self._df.iterrows():
+            self.data.append(data.to_dict())
+
+    def get_parameter_collection(self):
         pass
-
-
 
