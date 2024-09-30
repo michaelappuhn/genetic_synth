@@ -2,7 +2,7 @@ import mido
 from random import randint, seed
 from time import time
 
-from synthesizer.parameters import ParameterCollection, Parameter
+from synthesizer.parameters import ParameterCollection, Parameter, AnalogRytmParameterCSVReader
 
 seed(time())
 
@@ -69,19 +69,32 @@ class MidiCCMessage(MidiMessage):
         time = 0
         self.msg = mido.Message(type='control_change', channel=self.channel, control=self.cc, value=self.value, time=time)
 
+    def __str__(self):
+        return f'channel: {self.channel}, param: {self.param}'
+
+    def __repr__(self):
+        return f'MidiCCMessage: channel: {self.channel}, param: {self.param}'
+
 
 class MidiMessageCollectionSender():
-    def __init__(self, channel):
+    def __init__(self, midi_connect:MidiConnection, channel):
+        self.midi_connect = midi_connect
         self.channel = channel
+        self.messages = []
+
+    def convert_parameters_to_messages(self, collection: ParameterCollection):
+        for param in collection:
+            print(param)   
+            message = MidiCCMessage(self.midi_connect, self.channel, param)
+            self.messages.append(message)
+            print(message)
+
         
-    def send_collection_messages(collection: ParameterCollection):
+    def send_collection_messages(self):
         pass
 
-    def set_channel(channel):
+    def set_channel(self, channel):
         self.channel = channel
-
-    def connect_to_synth():
-        pass
 
 
 class AnalogRytmMidiMessageCollectionSender(MidiMessageCollectionSender):
@@ -93,6 +106,8 @@ class AnalogRytmMidiMessageCollectionSender(MidiMessageCollectionSender):
             self.machine = current_machine
         else:
             self.select_random_machine()
+
+        self.convert_parameters_to_messages(AnalogRytmParameterCSVReader.get_random_parameter_collection())
 
     def select_random_machine(self):
         # set the default machine as 200, which is way out of bounds
