@@ -53,7 +53,7 @@ class MidiMessage():
 
     def send(self):
         self.midi_connect.port.send(self.msg)
-        print(self.msg)
+        #print(self.msg)
 
 
 class MidiCCMessage(MidiMessage):
@@ -77,21 +77,22 @@ class MidiCCMessage(MidiMessage):
 
 
 class MidiMessageCollectionSender():
-    def __init__(self, midi_connect:MidiConnection, channel):
+    def __init__(self, midi_connect:MidiConnection, channel:int):
         self.midi_connect = midi_connect
         self.channel = channel
         self.messages = []
 
     def convert_parameters_to_messages(self, collection: ParameterCollection):
         for param in collection:
-            print(param)   
+            #print(param)   
             message = MidiCCMessage(self.midi_connect, self.channel, param)
             self.messages.append(message)
-            print(message)
+            #print(message)
 
         
     def send_collection_messages(self):
-        pass
+        for message in self.messages:
+            message.send()
 
     def set_channel(self, channel):
         self.channel = channel
@@ -99,24 +100,36 @@ class MidiMessageCollectionSender():
 
 class AnalogRytmMidiMessageCollectionSender(MidiMessageCollectionSender):
 
-    def __init__(self, channel, need_send_machine=False, current_machine:int = 200):
-        super().__init__(channel)
-        print("Channel: ", avail_machines_by_channel[0,1])
+    def __init__(self, midi_connect:MidiConnection, channel:int, need_send_machine=False, current_machine:int = 200):
+        super().__init__(midi_connect, channel)
+
+        #machine selection is isolated from other CCs because complicated
+        self.determine_if_machine_change_needed(need_send_machine, current_machine)
+
+        ar_parameter_collection = AnalogRytmParameterCSVReader().get_random_parameter_collection()
+        self.convert_parameters_to_messages(ar_parameter_collection)
+
+    def determine_if_machine_change_needed(self, need_send_machine, current_machine):
         if (current_machine < 200) and (need_send_machine == True):
             self.machine = current_machine
         else:
+            self.machine_selector = AnalogRytmMachineSelector(self.channel)
             self.select_random_machine()
 
-        self.convert_parameters_to_messages(AnalogRytmParameterCSVReader.get_random_parameter_collection())
-
+        
     def select_random_machine(self):
         # set the default machine as 200, which is way out of bounds
-            ms = AnalogRytmMachineSelector(self.channel)
-            ms.get_random_machine()
+        machine_num = self.machine_selector.get_random_machine()
+        print(f'MACHINE NUM: {machine_num}')
+        self.send_machine_selection(machine_num)
 
-    def send_machine_selection(self):
-        print("send machine selection message to analog")
-        pass
+    def send_machine_selection(self, machine_num):
+        machine_cc = 15
+        selection_param =  Parameter(machine_cc, machine_num, 0, self.machine_selector.get_num_machines())
+        selection_message = MidiMessage(self.midi_connect, self.channel, selection_param)
+        print(selection_message.msg)
+        #selection_message.send()
+        #print("send machine selection message to analog")
 
 class AnalogRytmMachineSelector():
     avail_machines_by_channel = [

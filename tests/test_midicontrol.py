@@ -65,9 +65,9 @@ class TestMidiMessageCollectionSender(TestCase):
 
 
         self.mcs = MidiMessageCollectionSender(conn, self.channel)
+        self.mcs.convert_parameters_to_messages(self.pc)
 
     def test_convert_params_messages(self):
-        self.mcs.convert_parameters_to_messages(self.pc)
         self.assertEqual(self.mcs.messages[0].cc, 17)
         self.assertEqual(self.mcs.messages[2].cc, 19)
         
@@ -77,3 +77,19 @@ class TestMidiMessageCollectionSender(TestCase):
 
     def test_send_collection_messages(self):
         self.mcs.send_collection_messages()
+
+
+class TestRytmMidiMessageCollectionSender(TestCase):
+    def setUp(self):
+        self.pc = ParameterCollection()
+        channel = 3
+        self.arcs = AnalogRytmMidiMessageCollectionSender(conn, channel, True)
+
+    def test_send_collection(self):
+        self.arcs.send_collection_messages()
+
+    def test_random_machine_select(self):
+        self.arcs.select_random_machine()
+        
+
+
