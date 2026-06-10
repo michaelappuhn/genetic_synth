@@ -1,4 +1,5 @@
 import sys
+import time
 
 import mido
 
@@ -57,41 +58,27 @@ class LPD8VoteController(VoteController):
             return True
         else: return False
 
-    def get_vote(self):
-        for msg in self.port:
-            #print(msg)
-            #print("channel", msg.channel)
-
-            # Turning the LPD8 into a voting system?
-            if (msg.type == 'note_on'):
-                #print("note:", msg.note)
-                if msg.note == 36:
-                    vote=1
-                if msg.note == 37:
-                    vote=2
-                if msg.note == 38:
-                    vote=3
-                if msg.note == 39:
-                    vote=4
-                if msg.note == 40:
-                    vote=5
-                if msg.note == 41:
-                    vote=6
-                if msg.note == 42:
-                    vote=7
-                if msg.note == 43:
-                    vote=8
-                elif (msg.note < 36 or msg.note > 43):
+    def get_vote(self, on_replay=None, replay_cc=1):
+        while True:
+            for msg in self.port.iter_pending():
+                if msg.type == 'note_on' and 36 <= msg.note <= 43:
+                    return msg.note - 35   # 36→1, 43→8
+                if msg.type == 'note_on':
                     print("Your LPD8 should be on Prog1!")
-                    vote = False
-                return(vote)
-                #break
+                    continue
+                if msg.type == 'control_change' and msg.control == replay_cc:
+                    if on_replay is not None:
+                        on_replay()
+            time.sleep(0.01)
         
     
 
 class KeyboardVoteController(VoteController):
 
-    def get_vote(self):
+    def get_vote(self, on_replay=None, replay_cc=1):
+        # Keyboard fallback has no replay support — accept the params for
+        # signature parity with LPD8VoteController and ignore them.
+        _ = on_replay, replay_cc
         #vote = int(input("Please rate the pad between 1-8: "))
         got_info = False
         try:
