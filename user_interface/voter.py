@@ -1,3 +1,5 @@
+import sys
+
 import mido
 
 def main():
@@ -89,7 +91,7 @@ class LPD8VoteController(VoteController):
 
 class KeyboardVoteController(VoteController):
 
-    def get_vote():
+    def get_vote(self):
         #vote = int(input("Please rate the pad between 1-8: "))
         got_info = False
         try:

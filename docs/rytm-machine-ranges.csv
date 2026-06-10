@@ -1,0 +1,306 @@
+machine,cc,param,type,discrete_count,notes
+# Per-machine CC parameter audit derived from Analog Rytm MKII User Manual OS 1.72
+# (docs/Analog-Rytm-MKII-User-Manual_ENG_OS1.72.pdf, Appendix C + D).
+#
+# type column:
+#   linear   - standard 0-127, value rises monotonically
+#   bipolar  - knob is bipolar; MIDI 64 is the musical zero. Cap GA ranges CENTERED on 64.
+#   discrete - finite set of values; sample uniformly across the set (count if known)
+#
+# All BD/SD/RS tracks share the same FILTER (CC 70-77), AMP (CC 78-83, 10, 7), and
+# LFO (CC 102-109) implementations. See FILTER/AMP/LFO sections at bottom.
+#
+# Machine numbers (0-based MIDI) referenced from synthesizer/midicontrol.py.
+#
+# === UNIVERSAL MACHINES (any track) ===
+UT NOISE,16,Level,linear,,
+UT NOISE,17,LP Frequency,linear,,
+UT NOISE,18,Decay,linear,,
+UT NOISE,19,Sweep Depth,bipolar,,negative and positive sweeps both possible
+UT NOISE,20,Sweep Time,linear,,
+UT NOISE,21,LP Resonance,linear,,
+UT NOISE,22,HP Frequency,linear,,
+UT NOISE,23,Attack,linear,,
+UT IMPULSE,16,Level,linear,,
+UT IMPULSE,17,Attack,linear,,
+UT IMPULSE,18,Decay,linear,,
+UT IMPULSE,19,Polarity,discrete,2,POS / NEG
+# DISABLE has no synth parameters; SRC page is empty.
+#
+# === BASS DRUM MACHINES (BD/SD/RS/CP tracks) ===
+BD HARD,16,Level,linear,,
+BD HARD,17,Tune,bipolar,,in semitones
+BD HARD,18,Decay,linear,,
+BD HARD,19,Hold,linear,,
+BD HARD,20,Sweep Time,linear,,
+BD HARD,21,Sweep Depth,bipolar,,depth fixed in BD HARD per Appendix D
+BD HARD,22,Waveform,discrete,3,sine / asym sine / triangle
+BD HARD,23,Transient Tick,linear,,
+BD CLASSIC,16,Level,linear,,
+BD CLASSIC,17,Tune,bipolar,,in semitones
+BD CLASSIC,18,Decay,linear,,
+BD CLASSIC,19,Hold,linear,,
+BD CLASSIC,20,Sweep Time,linear,,
+BD CLASSIC,21,Sweep Depth,bipolar,,
+BD CLASSIC,22,Waveform,discrete,3,sine / asym sine / triangle
+BD CLASSIC,23,Transient Tick,linear,,Appendix D says "TRA (Transient)" — tick or noise transient sound and its level
+BD FM,16,Level,linear,,
+BD FM,17,Tune,bipolar,,modulated osc
+BD FM,18,Decay,linear,,modulated osc decay = whole drum sound
+BD FM,19,FM Amount,linear,,explicitly 0-127 per manual
+BD FM,20,Sweep Time,linear,,
+BD FM,21,FM Sweep Time,linear,,modulating osc
+BD FM,22,FM Decay Time,linear,,modulating osc decay
+BD FM,23,FM Tune,bipolar,,modulating osc pitch
+BD PLASTIC,16,Level,linear,,Appendix C and D disagree; trust C (MIDI spec) — D mentions TYP/MOD instead
+BD PLASTIC,17,Tune,bipolar,,
+BD PLASTIC,18,Decay Time,linear,,
+BD PLASTIC,19,Sweep Depth,bipolar,,
+BD PLASTIC,20,Sweep Time,linear,,
+BD PLASTIC,21,Hold Time,linear,,
+BD PLASTIC,22,VCO Click,linear,,
+BD PLASTIC,23,Dust Level,linear,,
+BD SILKY,16,Level,linear,,
+BD SILKY,17,Tune,bipolar,,
+BD SILKY,18,Decay,linear,,
+BD SILKY,19,Sweep Depth,bipolar,,
+BD SILKY,20,Sweep Time,linear,,
+BD SILKY,21,Hold,linear,,
+BD SILKY,22,VCO Click,linear,,
+BD SILKY,23,Dust Level,linear,,
+BD SHARP,16,Level,linear,,
+BD SHARP,17,Tune,bipolar,,
+BD SHARP,18,Decay,linear,,
+BD SHARP,19,Sweep Depth,bipolar,,
+BD SHARP,20,Sweep Time,linear,,
+BD SHARP,21,Hold Time,linear,,
+BD SHARP,22,Tick Level,linear,,
+BD SHARP,23,Waveform,discrete,12,6 waveforms × 2 reset modes (free/anchor)
+BD ACOUSTIC,16,Level,linear,,
+BD ACOUSTIC,17,Tune,bipolar,,
+BD ACOUSTIC,18,Decay,linear,,
+BD ACOUSTIC,19,Sweep Depth,bipolar,,
+BD ACOUSTIC,20,Sweep Time,linear,,
+BD ACOUSTIC,21,Hold Time,linear,,
+BD ACOUSTIC,22,Impact,linear,,PCM + noise transient
+BD ACOUSTIC,23,Waveform,discrete,12,6 waveforms × 2 reset modes
+#
+# === SNARE DRUM MACHINES ===
+SD HARD,16,Level,linear,,
+SD HARD,17,Tune,bipolar,,oscillators with fixed interval
+SD HARD,18,Decay,linear,,
+SD HARD,19,Sweep Depth,bipolar,,
+SD HARD,20,Tick Level,linear,,
+SD HARD,21,Noise Decay,linear,,
+SD HARD,22,Noise Level,linear,,
+SD HARD,23,Sweep Time,linear,,
+SD CLASSIC,16,Level,linear,,
+SD CLASSIC,17,Tune,bipolar,,common pitch
+SD CLASSIC,18,Decay,linear,,
+SD CLASSIC,19,Detune,bipolar,,
+SD CLASSIC,20,Snap Amount,linear,,
+SD CLASSIC,21,Noise Decay,linear,,
+SD CLASSIC,22,Noise Level,linear,,
+SD CLASSIC,23,Osc Balance,bipolar,,
+SD FM,16,Level,linear,,
+SD FM,17,Tune,bipolar,,modulated osc
+SD FM,18,Decay,linear,,
+SD FM,19,FM Tune,bipolar,,
+SD FM,20,FM Decay Time,linear,,
+SD FM,21,Noise Decay,linear,,
+SD FM,22,Noise Level,linear,,
+SD FM,23,FM Amount,linear,,
+SD NATURAL,16,Level,linear,,
+SD NATURAL,17,Tune,bipolar,,
+SD NATURAL,18,Body Decay,linear,,
+SD NATURAL,19,Noise Decay,linear,,
+SD NATURAL,20,Noise LPF,linear,,
+SD NATURAL,21,Noise Balance,bipolar,,
+SD NATURAL,22,Noise Resonance,linear,,
+SD NATURAL,23,Noise HPF,linear,,
+SD ACOUSTIC,16,Level,linear,,
+SD ACOUSTIC,17,Tune,bipolar,,
+SD ACOUSTIC,18,Decay,linear,,
+SD ACOUSTIC,19,Noise Decay,linear,,
+SD ACOUSTIC,20,Hold Time,linear,,
+SD ACOUSTIC,21,Noise Level,linear,,
+SD ACOUSTIC,22,Impact,linear,,
+SD ACOUSTIC,23,Sweep Depth,bipolar,,
+#
+# === RIMSHOT MACHINES (RS/CP tracks only) ===
+RS HARD,16,Level,linear,,
+RS HARD,17,Tune,bipolar,,
+RS HARD,18,Decay,linear,,
+RS HARD,19,Sweep Depth,bipolar,,
+RS HARD,20,Tick Level,linear,,
+RS HARD,21,Noise Level,linear,,
+RS HARD,22,Symmetry,bipolar,,nonlinearity adjustment
+RS HARD,23,Sweep Time,linear,,
+RS CLASSIC,16,Level,linear,,
+RS CLASSIC,17,Tune Osc 1,bipolar,,
+RS CLASSIC,18,Decay,linear,,
+RS CLASSIC,19,Osc Balance,bipolar,,
+RS CLASSIC,20,Tune Osc 2,bipolar,,
+RS CLASSIC,21,Symmetry,bipolar,,
+RS CLASSIC,22,Noise Level,linear,,
+RS CLASSIC,23,Tick Level,linear,,
+#
+# === HAND CLAP MACHINES (CP tracks only) ===
+CP CLASSIC,16,Level,linear,,
+CP CLASSIC,17,Noise Tone,linear,,
+CP CLASSIC,18,Noise Decay,linear,,
+CP CLASSIC,19,Clap Number,linear,,discrete-feeling but documented as continuous
+CP CLASSIC,20,Clap Rate,linear,,
+CP CLASSIC,21,Noise Level,linear,,
+CP CLASSIC,22,Random Claps,linear,,
+CP CLASSIC,23,Clap Decay,linear,,
+#
+# === SYNTH MACHINES (BD/SD/RS/CP tracks) ===
+SY DUAL VCO,16,Level,linear,,
+SY DUAL VCO,17,Osc 1 Tune,bipolar,,value 0 = C-2; 24 units = 1 octave (24 sem/oct scaling)
+SY DUAL VCO,18,Osc 1 Decay,linear,,
+SY DUAL VCO,19,Balance,bipolar,,0 = both max; +/- attenuates one
+SY DUAL VCO,20,Osc 2 Detune,bipolar,,48 units = 1 octave
+SY DUAL VCO,21,Osc Config,discrete,,osc1×osc2 waveform combos + mod modes (+/R/F/FR/_ reset)
+SY DUAL VCO,22,Osc 2 Decay,linear,,
+SY DUAL VCO,23,Bend,bipolar,,24 units = 1 octave
+SY CHIP,16,Level,linear,,
+SY CHIP,17,Tune,bipolar,,in semitones
+SY CHIP,18,Decay,linear,,
+SY CHIP,19,Waveform,discrete,,static + animated + table-based + digital pulse families
+SY CHIP,20,Speed,discrete,,note divisions / Hz / single-shot ranges
+SY CHIP,21,Offset 2,bipolar,,0 = restart arpeggiator
+SY CHIP,22,Offset 3,bipolar,,0 = restart arpeggiator
+SY CHIP,23,Offset 4,bipolar,,0 = restart arpeggiator
+SY RAW,16,Level,linear,,
+SY RAW,17,Tune,bipolar,,value 0 = C-2
+SY RAW,18,Decay,linear,,
+SY RAW,19,Noise Level,linear,,
+SY RAW,20,Osc 2 Detune,bipolar,,
+SY RAW,21,Waveform 1,discrete,7,sine / asym sine / triangle / sinesaw / asym saw / saw / ring-mod
+SY RAW,22,Waveform 2,discrete,4,sine / sinesaw (× free/reset variants)
+SY RAW,23,Balance,bipolar,,
+#
+# === BASS TOM (BT track only) ===
+BT CLASSIC,16,Level,linear,,
+BT CLASSIC,17,Tune,bipolar,,
+BT CLASSIC,18,Decay,linear,,
+BT CLASSIC,19,Sweep Depth,bipolar,,
+BT CLASSIC,20,Noise Level,linear,,
+BT CLASSIC,21,Snap Type,discrete,,Appendix D mentions "Snap" length but Appendix C says "Snap Type" — treat discrete
+# CCs 22-23 are unassigned for BT CLASSIC (Appendix C lists only 6 params)
+#
+# === TOM MACHINES (LT/MT/HT tracks) ===
+XT CLASSIC,16,Level,linear,,used on LT/MT/HT tracks
+XT CLASSIC,17,Tune,bipolar,,
+XT CLASSIC,18,Decay,linear,,
+XT CLASSIC,19,Sweep Depth,bipolar,,
+XT CLASSIC,20,Sweep Time,linear,,
+XT CLASSIC,21,Noise Decay,linear,,
+XT CLASSIC,22,Noise Level,linear,,
+XT CLASSIC,23,Noise Tone,linear,,pitch of the noise
+#
+# === CLOSED HIHAT MACHINES (CH/OH tracks) ===
+HH BASIC,16,Level,linear,,
+HH BASIC,17,Tune,bipolar,,pitch of 6 oscillators combined
+HH BASIC,18,Decay Time,linear,,
+HH BASIC,19,Tone,bipolar,,positive = shrill / negative = deeper
+HH BASIC,20,Transient Decay,linear,,
+HH BASIC,21,Osc Reset,discrete,2,free vs reset on trigger
+# CCs 22-23 are unassigned for HH BASIC
+HH LAB,16,Level,linear,,
+HH LAB,17,Tune 1,bipolar,,osc 1 frequency
+HH LAB,18,Decay Time,linear,,
+HH LAB,19,Tune 2,bipolar,,
+HH LAB,20,Tune 3,bipolar,,
+HH LAB,21,Tune 4,bipolar,,
+HH LAB,22,Tune 5,bipolar,,
+HH LAB,23,Tune 6,bipolar,,
+CH CLASSIC,16,Level,linear,,
+CH CLASSIC,17,Tune,bipolar,,
+CH CLASSIC,18,Decay,linear,,
+CH CLASSIC,19,Color,linear,,timbral color (Noise Color)
+# CCs 20-23 unassigned for CH CLASSIC
+CH METALLIC,16,Level,linear,,
+CH METALLIC,17,Tune,bipolar,,interacting oscillators
+CH METALLIC,18,Decay Time,linear,,
+# CCs 19-23 unassigned for CH METALLIC
+#
+# === OPEN HIHAT MACHINES (CH/OH tracks) ===
+OH CLASSIC,16,Level,linear,,
+OH CLASSIC,17,Tune,bipolar,,
+OH CLASSIC,18,Decay,linear,,
+OH CLASSIC,19,Color,linear,,
+# CCs 20-23 unassigned for OH CLASSIC
+OH METALLIC,16,Level,linear,,
+OH METALLIC,17,Tune,bipolar,,
+OH METALLIC,18,Decay Time,linear,,
+# CCs 19-23 unassigned for OH METALLIC
+#
+# === CYMBAL MACHINES (CY/CB tracks) ===
+CY CLASSIC,16,Level,linear,,
+CY CLASSIC,17,Tune,bipolar,,interacting oscillators
+CY CLASSIC,18,Decay,linear,,
+CY CLASSIC,19,Color,linear,,timbral color
+CY CLASSIC,20,Tone,linear,,metallic tone
+# CCs 21-23 unassigned for CY CLASSIC
+CY METALLIC,16,Level,linear,,
+CY METALLIC,17,Tune,bipolar,,ring-modulated oscillators
+CY METALLIC,18,Decay Time,linear,,
+CY METALLIC,19,Tone,linear,,
+CY METALLIC,20,Transient Decay,linear,,
+# CCs 21-23 unassigned for CY METALLIC
+CY RIDE,16,Level,linear,,
+CY RIDE,17,Tune,bipolar,,
+CY RIDE,18,Tail Decay,linear,,
+CY RIDE,19,Hit Decay,linear,,
+CY RIDE,20,Cymbal Type,discrete,,osc frequency sets + interactions
+CY RIDE,21,Component 1,linear,,
+CY RIDE,22,Component 2,linear,,
+CY RIDE,23,Component 3,linear,,
+#
+# === COWBELL MACHINES (CY/CB tracks) ===
+CB CLASSIC,16,Level,linear,,
+CB CLASSIC,17,Tune,bipolar,,base pitch of 2 oscillators
+CB CLASSIC,18,Decay Time,linear,,
+CB CLASSIC,19,Detune,bipolar,,osc 2 offset
+CB CLASSIC,20,Pulse Width 1,linear,,not in Appendix C — sourced from Appendix D
+CB CLASSIC,21,Pulse Width 2,linear,,not in Appendix C — sourced from Appendix D
+# Note: Appendix C ("CB CLASSIC & METALLIC") lists only 4 CCs (Level/Tune/Decay/Detune).
+# Appendix D mentions PW1/PW2 — likely CCs 20/21 but not documented in MIDI spec.
+CB METALLIC,16,Level,linear,,
+CB METALLIC,17,Tune,bipolar,,
+CB METALLIC,18,Decay Time,linear,,
+CB METALLIC,19,Detune,bipolar,,
+CB METALLIC,20,Pulse Width 1,linear,,Appendix D only
+CB METALLIC,21,Pulse Width 2,linear,,Appendix D only
+#
+# === SHARED FILTER PAGE (CC 70-77, all machines) ===
+FILTER,70,Filter Attack Time,linear,,
+FILTER,71,Filter Decay Time,linear,,
+FILTER,72,Filter Sustain Level,linear,,
+FILTER,73,Filter Release Time,linear,,
+FILTER,74,Filter Frequency,linear,,
+FILTER,75,Filter Resonance,linear,,
+FILTER,76,Filter Mode,discrete,7,LP2 / LP1 / BP / HP1 / HP2 / BS / PK
+FILTER,77,Filter Env Depth,bipolar,,negative and positive modulation depth
+#
+# === SHARED AMP PAGE (CC 78-83 + 10 + 7) ===
+AMP,78,Amp Attack Time,linear,,
+AMP,79,Amp Hold Time,linear,,special value 0 = AUTO (pad-release driven); 1-127 = fixed hold
+AMP,80,Amp Decay Time,linear,,
+AMP,81,Amp Overdrive,linear,,gain boost before filter
+AMP,82,Amp Delay Send,linear,,
+AMP,83,Amp Reverb Send,linear,,
+AMP,10,Amp Pan,bipolar,,-64 = full L / +63 = full R / 64 = center
+AMP,7,Amp Volume,linear,,
+#
+# === SHARED LFO PAGE (CC 102-109) ===
+LFO,102,LFO Speed,bipolar,,negative values play backward
+LFO,103,LFO Multiplier,discrete,24,12 tempo-synced + 12 free
+LFO,104,LFO Fade In/Out,bipolar,,positive = fade-out / negative = fade-in / center = no fade
+LFO,105,LFO Destination,discrete,42,parameter list per-page
+LFO,106,LFO Waveform,discrete,7,Triangle / Sine / Square / Saw / Exp / Ramp / Random
+LFO,107,LFO Start Phase,linear,,64 = dead center start position
+LFO,108,LFO Trig Mode,discrete,5,FREE / TRIG / HOLD / ONE / HALF
+LFO,109,LFO Depth,bipolar,,center 64 = no modulation; high-resolution (CC LSB 118)
