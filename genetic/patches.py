@@ -77,7 +77,10 @@ def to_individual(patch, machines, evolved_ccs, individual_cls) -> Tuple[list, d
 
     Returns (individual, dropped_ccs) where:
     - individual = [machine_idx, evolved_cc_val_0, evolved_cc_val_1, ...]
-    - dropped_ccs = {cc: value, ...} for patch CCs not in evolved_ccs
+    - dropped_ccs = {cc: value, ...} for patch CCs not in evolved_ccs.
+      This includes the caller's fixed CCs (we don't know about fixed_values
+      here). Caller should filter dropped against its own fixed_values before
+      warning about surprising drops.
 
     Raises ValueError if patch's machine_number isn't in machines, or if any
     evolved_cc is missing from the patch's parameter list.

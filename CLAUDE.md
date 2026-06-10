@@ -24,7 +24,7 @@ python -m genetic.main resume runs/2026-*-pad0 --generations 3
 
 # Tests (uses stdlib unittest, discovered from ./tests/)
 ./unittests.sh                          # all tests, verbose (requires Rytm)
-python -m unittest tests.test_parameters tests.test_cli tests.test_logging tests.test_voter
+python -m unittest tests.test_parameters tests.test_cli tests.test_logging tests.test_voter tests.test_patches
                                         # device-free subset
 python -m unittest tests.test_parameters.TestParameter            # one class
 python -m unittest tests.test_parameters.TestParameter.test_default  # one test

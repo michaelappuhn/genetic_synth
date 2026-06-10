@@ -86,7 +86,7 @@ Pads not in `PAD_CONFIG` evolve every curated CC with no machine filter. To targ
 Beyond this README, see:
 
 - **`CLAUDE.md`** — codebase tour and gotchas.
-- **`docs/specs/`** — milestone specs M0-M7. `M0` and `M1` are shipped; later milestones are planned.
+- **`docs/specs/`** — milestone specs M0-M7. M0 through M3 are shipped; M4 onward are planned.
 - **`docs/Analog-Rytm-MKII-User-Manual_ENG_OS1.72.pdf`** — official Elektron manual. Appendix C is the MIDI implementation chart; Appendix D describes every machine's SRC parameters.
 - **`docs/rytm-machine-ranges.csv`** — audit of all 36 Rytm machines + shared Filter/Amp/LFO pages, classifying every CC slot as `linear` / `bipolar` / `discrete`. Use this when picking caps in `pad_config.py` — bipolar params need centered ranges, not capped extremes.
 - **`kits_10.md`** — which machines are valid per Rytm channel (1-based labels; subtract 1 for the 0-based MIDI values the code uses).
