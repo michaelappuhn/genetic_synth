@@ -355,13 +355,23 @@ def _resume(args):
     pad = config["pad"]
     midi_channel = config["midi_channel"]
     pop_size = config["pop_size"]
-    n_more_generations = args.generations if args.generations is not None \
-        else config["generations"]
     crossover_rate = config["crossover_rate"]
     mutation_rate = config["mutation_rate"]
     mutation_indpb = config["mutation_indpb"]
     tournament_size = config["tournament_size"]
     seed = config["seed"]
+
+    # --generations is the only resume-time override available today. If the
+    # user passed a value that differs from config.json, require --override.
+    if args.generations is not None and args.generations != config["generations"]:
+        if not args.override:
+            raise SystemExit(
+                f"--generations {args.generations} conflicts with config.json's "
+                f"{config['generations']}. Pass --override to confirm."
+            )
+        n_more_generations = args.generations
+    else:
+        n_more_generations = config["generations"]
 
     random.seed(seed)
 
