@@ -8,10 +8,17 @@ from typing import Optional
 
 def make_run_dir(base: Path, pad: int, now: Optional[datetime] = None) -> Path:
     now = now or datetime.now()
-    name = f"{now.strftime('%Y-%m-%d-%H%M')}-pad{pad}"
-    run_dir = base / name
-    run_dir.mkdir(parents=True, exist_ok=False)
-    return run_dir
+    stem = f"{now.strftime('%Y-%m-%d-%H%M')}-pad{pad}"
+    for suffix in [""] + [f"-{i}" for i in range(1, 10)]:
+        candidate = base / (stem + suffix)
+        try:
+            candidate.mkdir(parents=True, exist_ok=False)
+            return candidate
+        except FileExistsError:
+            continue
+    raise RuntimeError(
+        f"10 runs in the same minute on pad {pad} — wait one minute or pass --no-log"
+    )
 
 
 def write_config(run_dir: Path, config: dict) -> None:
@@ -42,3 +49,17 @@ def log_vote(fh, gen, eval_idx, machine, evolved_ccs, fixed_ccs, vote, timestamp
         "timestamp_iso": timestamp_iso,
     }) + "\n")
     fh.flush()
+
+
+def read_last_generation(run_dir: Path) -> dict:
+    """Return the generations.jsonl row with the highest best_fitness.
+    Tiebreak: the latest gen. Used by save-best and resume."""
+    rows = []
+    with (run_dir / "generations.jsonl").open() as fh:
+        for line in fh:
+            line = line.strip()
+            if line:
+                rows.append(json.loads(line))
+    if not rows:
+        raise ValueError(f"no rows in {run_dir / 'generations.jsonl'}")
+    return max(rows, key=lambda r: (r["best_fitness"], r["gen"]))

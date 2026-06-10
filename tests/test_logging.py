@@ -9,6 +9,7 @@ from genetic.logging import (
     write_config,
     log_generation,
     log_vote,
+    read_last_generation,
 )
 
 
@@ -87,6 +88,67 @@ class TestLogVote(unittest.TestCase):
             self.assertEqual(row["machine"], 13)
             self.assertEqual(row["evolved_ccs"], {"17": 64, "109": 60})
             self.assertEqual(row["vote"], 5)
+
+
+class TestMakeRunDirCollision(unittest.TestCase):
+    def test_collision_uses_dash_one_suffix(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            ts = datetime(2026, 6, 10, 14, 22)
+            first = make_run_dir(base, pad=0, now=ts)
+            second = make_run_dir(base, pad=0, now=ts)
+            self.assertEqual(first.name, "2026-06-10-1422-pad0")
+            self.assertEqual(second.name, "2026-06-10-1422-pad0-1")
+            self.assertTrue(first.is_dir())
+            self.assertTrue(second.is_dir())
+
+    def test_collision_increments_suffix(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            ts = datetime(2026, 6, 10, 14, 22)
+            d0 = make_run_dir(base, pad=0, now=ts)
+            d1 = make_run_dir(base, pad=0, now=ts)
+            d2 = make_run_dir(base, pad=0, now=ts)
+            self.assertEqual(d2.name, "2026-06-10-1422-pad0-2")
+
+    def test_collision_raises_after_ten_tries(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            ts = datetime(2026, 6, 10, 14, 22)
+            for _ in range(10):
+                make_run_dir(base, pad=0, now=ts)
+            with self.assertRaises(RuntimeError):
+                make_run_dir(base, pad=0, now=ts)
+
+
+class TestReadLastGeneration(unittest.TestCase):
+    def test_returns_row_with_highest_best_fitness(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            run_dir = Path(tmp)
+            path = run_dir / "generations.jsonl"
+            with path.open("w") as fh:
+                log_generation(fh, gen=0, best_fitness=3.0, avg_fitness=2.0,
+                               min_fitness=1.0, best_individual=[0], n_evaluated=4)
+                log_generation(fh, gen=1, best_fitness=7.0, avg_fitness=4.0,
+                               min_fitness=2.0, best_individual=[1, 64], n_evaluated=4)
+                log_generation(fh, gen=2, best_fitness=5.0, avg_fitness=3.5,
+                               min_fitness=1.0, best_individual=[2], n_evaluated=4)
+            row = read_last_generation(run_dir)
+            self.assertEqual(row["gen"], 1)
+            self.assertEqual(row["best_fitness"], 7.0)
+            self.assertEqual(row["best_individual"], [1, 64])
+
+    def test_tiebreak_picks_latest_gen(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            run_dir = Path(tmp)
+            path = run_dir / "generations.jsonl"
+            with path.open("w") as fh:
+                log_generation(fh, gen=0, best_fitness=5.0, avg_fitness=3.0,
+                               min_fitness=1.0, best_individual=[1], n_evaluated=4)
+                log_generation(fh, gen=1, best_fitness=5.0, avg_fitness=4.0,
+                               min_fitness=2.0, best_individual=[2], n_evaluated=4)
+            row = read_last_generation(run_dir)
+            self.assertEqual(row["gen"], 1)   # tiebreak: latest gen wins
 
 
 if __name__ == "__main__":
