@@ -21,16 +21,35 @@ Start a GA run:
 
 ```bash
 source ./activate_virtualenv.sh
-python -m genetic.main
+python -m genetic.main                          # all defaults
+python -m genetic.main --help                   # see every flag
+python -m genetic.main --pad 0 --generations 10 --seed 42
 ```
 
-This runs the M1 loop: channel 0 (BD voice, 17 machines), population 4, 5 generations. Each candidate plays one trig on the Rytm and waits for a 1–8 vote from the LPD8 (or keyboard). Configuration is currently hardcoded at the top of `genetic/main.py` — CLI flags arrive in M2.
+Common flags:
+- `--pad` (default 0) — which Rytm voice to evolve (0=BD, 1=SD, ...). Drives `pad_config.py`.
+- `--midi-channel` — MIDI channel for sends. Defaults to `--pad`. Override if your Rytm routing reassigns pads to channels (e.g. `--midi-channel 10` when channel 10 triggers pad 0).
+- `--pop-size`, `--generations`, `--mutation-rate`, `--crossover-rate`, `--tournament-size` — DEAP knobs.
+- `--seed` — RNG seed. Default: `int(time())`. Logged in the run's `config.json` for reproducibility.
+- `--no-log` — skip run directory creation (smoke tests).
+
+Each run writes to `runs/YYYY-MM-DD-HHMM-pad<N>/`:
+- `config.json` — resolved args + Rytm port + pad_config snapshot
+- `generations.jsonl` — best/avg/min fitness + best individual per generation
+- `votes.jsonl` — one line per evaluation: gen, eval_idx, machine, CCs, vote, timestamp
+
+LPD8 controls during a run:
+- Pads 1-8 → votes 1-8
+- Knob 1 (CC 1 on Prog1) → re-hear the best-so-far without consuming a vote
+
+Ctrl-C exits cleanly, printing the run directory and champion.
 
 Tests:
 
 ```bash
 ./unittests.sh                                # full suite (requires Rytm connected)
-python -m unittest tests.test_parameters      # device-free unit tests only
+python -m unittest tests.test_parameters tests.test_cli tests.test_logging tests.test_voter
+                                              # device-free unit tests
 ```
 
 ## Customizing the search space

@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A genetic-algorithm-driven sound design tool for the **Elektron Analog Rytm MKII** drum machine. The GA randomizes synth parameters, sends them over MIDI as CC messages, and uses the user's subjective vote (1–8 from an Akai LPD8 pad controller, or keyboard fallback) as the fitness function. Inspired by Manuel DeLanda's framing of the genetic algorithm as a generative process — the "intensive property" being driven up over generations is the user's perception of sound quality.
 
-M0 (foundation cleanup) and M1 (end-to-end GA loop) are done. `genetic/` wires DEAP to the existing `synthesizer/` and `user_interface/` code; `python -m genetic.main` runs a full GA session on the Rytm. Future milestones (M2 CLI/logging, M3 persistence, M4 better fitness, M5 device abstraction, M6 Mopho, M7 multi-device) are specced in `docs/specs/`.
+M0 (foundation cleanup), M1 (end-to-end GA loop), and M2 (quality of life — CLI, logging, replay-best, elitism, graceful Ctrl-C) are done. `genetic/` wires DEAP to the existing `synthesizer/` and `user_interface/` code; `python -m genetic.main --help` shows the CLI surface. Future milestones (M3 persistence, M4 better fitness, M5 device abstraction, M6 Mopho, M7 multi-device) are specced in `docs/specs/`.
 
 ## Common commands
 
@@ -15,9 +15,15 @@ M0 (foundation cleanup) and M1 (end-to-end GA loop) are done. `genetic/` wires D
 source ./activate_virtualenv.sh         # or: source venv/bin/activate
 pip install -r requirements.txt
 
+# Run the GA
+python -m genetic.main --help
+python -m genetic.main --pad 0 --generations 10 --seed 42
+python -m genetic.main --no-log         # smoke test, no run directory
+
 # Tests (uses stdlib unittest, discovered from ./tests/)
-./unittests.sh                          # all tests, verbose
-python -m unittest tests.test_parameters                          # one module
+./unittests.sh                          # all tests, verbose (requires Rytm)
+python -m unittest tests.test_parameters tests.test_cli tests.test_logging tests.test_voter
+                                        # device-free subset
 python -m unittest tests.test_parameters.TestParameter            # one class
 python -m unittest tests.test_parameters.TestParameter.test_default  # one test
 ```
@@ -56,4 +62,4 @@ Three packages plus reference data:
 - **CSV-driven ranges are not authoritative.** `rytm-limited.csv` ranges (and the full `Rytm MKII.csv`) are community-curated, not vendor-published. The manual's MIDI implementation chart (Appendix C) confirms CC assignments but does NOT publish numeric MIDI ranges per machine. Use `docs/rytm-machine-ranges.csv` for orientation (linear/bipolar/discrete); pick musical ranges by ear.
 - **Pad ≠ MIDI channel.** `genetic/main.py` splits `PAD` (semantic; drives the machine palette and pad_config lookup) from `MIDI_CHANNEL` (where MIDI sends actually go). Default `MIDI_CHANNEL = PAD`. Override when Rytm MIDI routing reassigns pads to different channels for external-device triggering.
 - **GA bypasses the high-level Rytm sender.** `AnalogRytmMidiMessageCollectionSender.__init__` randomizes parameters and picks a machine internally. The GA driver (`genetic/evaluate.py`) constructs the parent `MidiMessageCollectionSender` directly to avoid that — the GA owns randomization, not the sender. M5 is slated to remove the high-level sender's embedded randomization.
-- **RNG seeded at module import** in `parameters.py` and `midicontrol.py` (`seed(time())`). Tests can't pin a deterministic seed without changing those modules. M2 will own deterministic seeding via a `--seed` flag.
+- **RNG seeded by the driver, not at import.** `genetic.main.run()` calls `random.seed(args.seed)` after CLI parse; the seed is logged in `config.json` so any run is reproducible by passing `--seed <N>`.
