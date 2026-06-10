@@ -60,7 +60,7 @@ The single most important customization point is **`genetic/pad_config.py`**. Fo
 - **`fixed_ccs`** — CCs that should NOT evolve. Map a CC to `DEFAULT` (keep the canonical CSV value) or to an integer to pin it (e.g. `82: 0` to zero out the delay send).
 - **`cc_value_caps`** — per-CC bound overrides. Use for bipolar params: cap centered on MIDI 64 (e.g. `(58, 70)` for a tight Tune range, `(54, 74)` for subtle LFO depth).
 
-Pads not in `PAD_CONFIG` evolve every curated CC with no machine filter (the M1 default). To target a different voice, change `PAD` at the top of `genetic/main.py`. If your Rytm MIDI routing reassigns pads to different channels, override `MIDI_CHANNEL` separately.
+Pads not in `PAD_CONFIG` evolve every curated CC with no machine filter. To target a different voice, pass `--pad N` on the CLI. If your Rytm MIDI routing reassigns pads to different channels, pass `--midi-channel M` to override.
 
 ## Reference materials
 
