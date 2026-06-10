@@ -44,15 +44,15 @@ Each run writes to `runs/YYYY-MM-DD-HHMM-pad<N>/` (with `-1`, `-2`, ... suffix
 if you restart within the same minute). Patches go to `patches/<name>.json`.
 Both directories are gitignored.
 
-Common run flags (same as M2):
+Common run flags:
 - `--pad` (default 0) — which Rytm voice to evolve.
 - `--midi-channel` — defaults to `--pad`. Override if Rytm routing reassigns pads.
 - `--pop-size`, `--generations`, `--mutation-rate`, `--crossover-rate`, `--tournament-size` — DEAP knobs.
 - `--seed` — RNG seed, logged for reproducibility.
 - `--no-log` — skip run-directory creation.
-- `--seed-from-patch <name>` — seed initial population with a saved patch.
+- `--seed-from-patch <name>` — seed initial population with a saved patch (M3).
 
-Each run writes to `runs/YYYY-MM-DD-HHMM-pad<N>/`:
+Each run dir contains:
 - `config.json` — resolved args + Rytm port + pad_config snapshot
 - `generations.jsonl` — best/avg/min fitness + best individual per generation
 - `votes.jsonl` — one line per evaluation: gen, eval_idx, machine, CCs, vote, timestamp

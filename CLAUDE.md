@@ -39,15 +39,17 @@ Three packages plus reference data:
   - `midicontrol.py` is the live MIDI layer, wrapping `mido`. Hierarchy: `MidiConnection` → `MidiMessage` / `MidiCCMessage` → `MidiMessageCollectionSender` → `AnalogRytmMidiMessageCollectionSender`. The Rytm sender also owns machine selection via `AnalogRytmMachineSelector`. Note: the GA driver bypasses `AnalogRytmMidiMessageCollectionSender` (which randomizes internally) and uses the parent class directly — see `genetic/evaluate.py`.
 
 - **`genetic/`** — the GA layer on top of DEAP.
+  - `cli.py` — argparse with subparsers (`run` default, `save-best`, `play`, `resume`). Peeks `sys.argv` before parsing to inject `run` when the first token isn't a known subcommand, preserving M2 bare-flag muscle memory.
   - `genome.py` — `apply_pad_config` splits canonical params into evolved-in-genome vs fixed-each-evaluation; `build_bounds`, `make_individual`, `bounded_mutate` are the DEAP-facing pieces.
-  - `evaluate.py` — `make_evaluate` builds the fitness closure: decode genome → clone canonical params → apply evolved values + fixed values → send machine CC → send all param CCs → trigger note → block on voter.get_vote().
+  - `evaluate.py` — `build_params_for_individual` decodes a genome into `(machine_num, params)`; `send_individual` sends machine CC + all param CCs + a trig (shared by the evaluator and the replay-best callback); `make_evaluate` builds the DEAP fitness closure, optionally stamping `gen`/`eval_idx` into a vote logger callback.
   - `pad_config.py` — **per-pad customization point**. For each pad, declares (a) which machines from `avail_machines_by_channel[pad]` are allowed, (b) which CCs to pin to fixed values, (c) per-CC bound overrides (e.g. centered caps for bipolar params). Pad 0 is configured for BD-kick search; other pads default to "evolve everything".
-  - `main.py` — top-level dispatcher. Parses CLI (via `cli.py`), routes to `_run` / `_save_best` / `_play` / `_resume`. `_run` is the M2 GA driver: argparse → seed → make `runs/` directory → DEAP toolbox → inline `mu+lambda` loop with HallOfFame elitism, replay-best callback, and per-vote/per-generation JSONL logging. `--midi-channel` defaults to `--pad`.
-  - `patches.py` — patch I/O + DEAP individual conversion. `save()` / `load()`, `from_individual()` (build patch dict from decoded individual), `to_individual()` (decode patch back to individual + machine_idx lookup). Pure data; no MIDI or DEAP setup.
+  - `logging.py` — pure file I/O for `runs/YYYY-MM-DD-HHMM-pad<N>/`. `make_run_dir` (with `-1`..`-9` collision suffix), `write_config`, `log_generation`/`log_vote` (flushed-per-line JSONL), `read_last_generation` (used by `save-best` and `resume`).
+  - `main.py` — top-level dispatcher. Parses CLI (via `cli.py`), routes to `_run` / `_save_best` / `_play` / `_resume`. `_run` is the M2 GA driver: seed RNG → make `runs/` directory → DEAP toolbox → inline `mu+lambda` loop with HallOfFame elitism, replay-best callback, and per-vote/per-generation JSONL logging. `--midi-channel` defaults to `--pad`.
+  - `patches.py` — patch I/O + DEAP individual conversion. `save()` / `load()`, `from_individual()` (build patch dict from decoded individual), `to_individual()` (decode patch back to individual + machine_idx lookup), `machine_name_for(pad, machine_num)` (drum-track lookup; `machine_<N>` placeholder for other pad families). Pure data; no MIDI or DEAP setup.
 
 - **`user_interface/voter.py`** — fitness input. `LPD8VoteController` listens for `note_on` 36–43 from an Akai LPD8 (must be on **Prog1**) and maps them to votes 1–8. `KeyboardVoteController` is the fallback. These are the fitness function for the GA.
 
-- **`tests/`** — `unittest` style. `test_parameters.py` is pure unit tests (device-free). `test_midicontrol.py` opens a real MIDI connection in `setUpModule` and several tests actually send notes/CC to the device — they will fail unless a port named `Elektron Analog Rytm MKII` is connected.
+- **`tests/`** — `unittest` style. Device-free: `test_parameters.py`, `test_cli.py`, `test_logging.py`, `test_voter.py` (uses a `FakePort` stub for the LPD8 path), `test_patches.py`. Hardware: `test_midicontrol.py` opens a real MIDI connection in `setUpModule` and several tests actually send notes/CC to the device — they will fail unless a port named `Elektron Analog Rytm MKII` is connected.
 
 ### Reference data
 
@@ -59,7 +61,7 @@ Three packages plus reference data:
 
 ## Gotchas
 
-- **MIDI tests require hardware.** `tests/test_midicontrol.py` opens a `MidiConnection('Elektron Analog Rytm MKII')` in `setUpModule` and several tests actually send notes/CC. Run `python -m unittest tests.test_parameters` alone for device-free work.
+- **MIDI tests require hardware.** `tests/test_midicontrol.py` opens a `MidiConnection('Elektron Analog Rytm MKII')` in `setUpModule` and several tests actually send notes/CC. Run the device-free subset (`tests.test_parameters tests.test_cli tests.test_logging tests.test_voter tests.test_patches`) when iterating without the Rytm.
 - **Channel numbering.** `kits_10.md` lists both 1-based human labels and 0-based; all code uses **0-based** internally. `AnalogRytmMachineSelector.avail_machines_by_channel[i]` is indexed by 0-based channel directly. kits_10's listed machine numbers are 1-based — convert by subtracting 1.
 - **Bipolar parameters need centered caps.** Many Rytm params are bipolar around MIDI 64 (Tune, Sweep Depth, Detune, Balance, Pan, Filter Env Depth, LFO Depth, LFO Speed, LFO Fade). Capping to `(0, 40)` samples only the "inverted modulation" half. See `docs/rytm-machine-ranges.csv` for the full per-machine type map.
 - **CSV-driven ranges are not authoritative.** `rytm-limited.csv` ranges (and the full `Rytm MKII.csv`) are community-curated, not vendor-published. The manual's MIDI implementation chart (Appendix C) confirms CC assignments but does NOT publish numeric MIDI ranges per machine. Use `docs/rytm-machine-ranges.csv` for orientation (linear/bipolar/discrete); pick musical ranges by ear.
