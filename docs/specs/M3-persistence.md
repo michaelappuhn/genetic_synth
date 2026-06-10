@@ -11,6 +11,8 @@ M2 logs everything that happened, but a champion is still just a row in a JSONL 
 - Load a saved patch and audition it directly (no GA run required)
 - Resume a stopped run from its `runs/` directory
 - Seed a new run from a saved patch (use champion as a starting point, mutate around it)
+- Clean up dead code in `user_interface/voter.py` left over from pre-M0 (see "Cleanup" below)
+- Robustify `make_run_dir` against same-minute collisions (see "Cleanup")
 
 **Out:**
 - SysEx dump back to the Rytm — kept as a stretch goal in this spec, owned by M3.5 if it lands
@@ -66,9 +68,9 @@ Loads the patch JSON, opens the Rytm connection, sends machine + CCs + a single 
 python -m genetic.main resume <run-dir>
 ```
 
-Reads the last generation's individuals from `generations.jsonl`, reconstructs the DEAP `Individual` objects (with fitnesses), and continues with `eaMuPlusLambda`. Append to the same `generations.jsonl` and `votes.jsonl`.
+Reads the last generation's individuals from `generations.jsonl`, reconstructs the DEAP `Individual` objects (with fitnesses), and continues with the same inline `mu+lambda` loop M2 uses. Append to the same `generations.jsonl` and `votes.jsonl`.
 
-Caveat: the config (pop size, mutation rate, channel, bounds) must come from the original `config.json`, not new CLI flags. Resume should refuse if CLI args conflict with `config.json` unless `--override` is passed.
+Caveat: the config (pop size, mutation rate, pad, midi-channel, bounds) must come from the original `config.json`, not new CLI flags. Resume should refuse if CLI args conflict with `config.json` unless `--override` is passed.
 
 ### Seed-from-patch
 
@@ -87,22 +89,31 @@ The Rytm accepts SysEx kit dumps. With a champion in memory, it's possible to wr
 
 This is a meaningful chunk of work and reasonably independent. **Recommended: ship M3 without it, then decide.** If wanted, it becomes M3.5 with its own short spec.
 
+### Cleanup
+
+Two carryover items surfaced by the M2 final review. Small, independent, ship them alongside the persistence work.
+
+**`user_interface/voter.py` dead code** — Pre-M0 module-level functions (`VotingSystem`, `VoteProcessor`, `get_lpd8_port`, `lpd8_vote`, `vote(port)`, the module-level `main()`) and the unused `VoteController.give_instructions()` stubs are still on disk. M1's `LPD8VoteController` and `KeyboardVoteController` are the live path; the rest is dead. Delete ~80 lines so the file reads as just the two controller classes the GA driver actually uses. `keyboard_vote()` (module-level, called by `KeyboardVoteController.get_vote()` via `keyboard_vote_instructions()` / recursion) needs review — fold its logic into the controller method, or keep just the helpers it actually references.
+
+**`make_run_dir` same-minute collision** — `genetic/logging.py:make_run_dir()` uses `mkdir(exist_ok=False)` with minute-resolution timestamps. Starting a run, Ctrl-C, restarting within the minute raises a bare `FileExistsError`. Add a seconds-resolution fallback (or a short suffix like `-1`, `-2`) so the user can iterate quickly without waiting out the clock. M3 needs to write to these directories from `save-best` and `resume` anyway, so it's a natural place to harden the format.
+
 ## Files
 
 New:
 - `patches/` directory (gitignored — these are personal artifacts)
 - `genetic/patches.py` — `save()`, `load()`, `to_individual()`, `from_individual()`
-- `genetic/cli.py` — extracted argparse setup with subcommands
 
 Touched:
+- `genetic/cli.py` — already exists from M2; extend with subcommand structure (`run`, `save-best`, `play`, `resume`)
 - `genetic/main.py` — wire `save-best`, `play`, `resume`, `--seed-from-patch`
-- `genetic/logging.py` — add a `read_last_generation(run_dir)` helper
+- `genetic/logging.py` — add `read_last_generation(run_dir)` helper; harden `make_run_dir` against same-minute collisions
+- `user_interface/voter.py` — delete dead pre-M0 module-level code
 
 ## Verification
 
 ```bash
 # Run, then save champion
-python -m genetic.main run --channel 2 --generations 5
+python -m genetic.main run --pad 2 --generations 5
 python -m genetic.main save-best runs/2026-*/ --name test-patch
 ls patches/test-patch.json
 
@@ -115,7 +126,7 @@ python -m genetic.main resume runs/2026-*/
 # - Picks up at generation 6, same channel, same bounds
 
 # Seed-from-patch
-python -m genetic.main run --channel 2 --seed-from-patch test-patch --generations 3
+python -m genetic.main run --pad 2 --seed-from-patch test-patch --generations 3
 # - Initial population contains the saved patch; first audition sounds identical to `play`
 ```
 
