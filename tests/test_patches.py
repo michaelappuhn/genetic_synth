@@ -105,7 +105,10 @@ class TestToIndividual(unittest.TestCase):
         evolved_ccs = [16, 17]                # CC 70 is fixed, not in genome
         ind, dropped = to_individual(patch, machines, evolved_ccs, list)
         self.assertEqual(ind, [5, 127, 64])
-        self.assertEqual(dropped, {})
+        # CC 70 is in the patch but not in evolved_ccs — it gets "dropped"
+        # from the genome. Caller (e.g. _make_initial_population) is expected
+        # to filter dropped against its own fixed_values dict before warning.
+        self.assertEqual(dropped, {70: 0})
 
     def test_drops_ccs_not_in_evolved(self):
         # Patch carries CC 109 (LFO Depth) but current pad doesn't evolve it

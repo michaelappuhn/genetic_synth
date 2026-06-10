@@ -100,8 +100,6 @@ def to_individual(patch, machines, evolved_ccs, individual_cls) -> Tuple[list, d
         )
 
     cc_values = [cc_to_value[cc] for cc in evolved_ccs]
-    evolved_set = set(evolved_ccs)
-    dropped = {cc: v for cc, v in cc_to_value.items()
-               if cc not in evolved_set and v != 0}
+    dropped = {cc: v for cc, v in cc_to_value.items() if cc not in set(evolved_ccs)}
 
     return individual_cls([machine_idx] + cc_values), dropped
