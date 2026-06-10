@@ -21,17 +21,36 @@ Start a GA run:
 
 ```bash
 source ./activate_virtualenv.sh
-python -m genetic.main                          # all defaults
-python -m genetic.main --help                   # see every flag
+python -m genetic.main                          # all defaults (run subcommand)
+python -m genetic.main --help                   # subcommand list
+python -m genetic.main run --help               # all run flags
 python -m genetic.main --pad 0 --generations 10 --seed 42
+
+# Save champion of a run as a patch
+python -m genetic.main save-best runs/2026-06-10-1422-pad0 --name kraken
+ls patches/kraken.json
+
+# Audition a saved patch without re-running the GA
+python -m genetic.main play kraken
+
+# Resume a stopped run (champion + random fill, append to same dir)
+python -m genetic.main resume runs/2026-06-10-1422-pad0 --generations 3
+
+# Seed a new run from a saved patch
+python -m genetic.main --pad 0 --seed-from-patch kraken --generations 5
 ```
 
-Common flags:
-- `--pad` (default 0) — which Rytm voice to evolve (0=BD, 1=SD, ...). Drives `pad_config.py`.
-- `--midi-channel` — MIDI channel for sends. Defaults to `--pad`. Override if your Rytm routing reassigns pads to channels (e.g. `--midi-channel 10` when channel 10 triggers pad 0).
+Each run writes to `runs/YYYY-MM-DD-HHMM-pad<N>/` (with `-1`, `-2`, ... suffix
+if you restart within the same minute). Patches go to `patches/<name>.json`.
+Both directories are gitignored.
+
+Common run flags (same as M2):
+- `--pad` (default 0) — which Rytm voice to evolve.
+- `--midi-channel` — defaults to `--pad`. Override if Rytm routing reassigns pads.
 - `--pop-size`, `--generations`, `--mutation-rate`, `--crossover-rate`, `--tournament-size` — DEAP knobs.
-- `--seed` — RNG seed. Default: `int(time())`. Logged in the run's `config.json` for reproducibility.
-- `--no-log` — skip run directory creation (smoke tests).
+- `--seed` — RNG seed, logged for reproducibility.
+- `--no-log` — skip run-directory creation.
+- `--seed-from-patch <name>` — seed initial population with a saved patch.
 
 Each run writes to `runs/YYYY-MM-DD-HHMM-pad<N>/`:
 - `config.json` — resolved args + Rytm port + pad_config snapshot
@@ -48,7 +67,7 @@ Tests:
 
 ```bash
 ./unittests.sh                                # full suite (requires Rytm connected)
-python -m unittest tests.test_parameters tests.test_cli tests.test_logging tests.test_voter
+python -m unittest tests.test_parameters tests.test_cli tests.test_logging tests.test_voter tests.test_patches
                                               # device-free unit tests
 ```
 

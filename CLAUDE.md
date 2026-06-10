@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A genetic-algorithm-driven sound design tool for the **Elektron Analog Rytm MKII** drum machine. The GA randomizes synth parameters, sends them over MIDI as CC messages, and uses the user's subjective vote (1–8 from an Akai LPD8 pad controller, or keyboard fallback) as the fitness function. Inspired by Manuel DeLanda's framing of the genetic algorithm as a generative process — the "intensive property" being driven up over generations is the user's perception of sound quality.
 
-M0 (foundation cleanup), M1 (end-to-end GA loop), and M2 (quality of life — CLI, logging, replay-best, elitism, graceful Ctrl-C) are done. `genetic/` wires DEAP to the existing `synthesizer/` and `user_interface/` code; `python -m genetic.main --help` shows the CLI surface. Future milestones (M3 persistence, M4 better fitness, M5 device abstraction, M6 Mopho, M7 multi-device) are specced in `docs/specs/`.
+M0 (foundation cleanup), M1 (end-to-end GA loop), M2 (quality of life — CLI, logging, replay-best, elitism, graceful Ctrl-C), and M3 (persistence — save/play/resume + seed-from-patch) are done. `genetic/` wires DEAP to the existing `synthesizer/` and `user_interface/` code; `python -m genetic.main --help` shows the CLI surface. Future milestones (M4 better fitness, M5 device abstraction, M6 Mopho, M7 multi-device) are specced in `docs/specs/`.
 
 ## Common commands
 
@@ -15,10 +15,12 @@ M0 (foundation cleanup), M1 (end-to-end GA loop), and M2 (quality of life — CL
 source ./activate_virtualenv.sh         # or: source venv/bin/activate
 pip install -r requirements.txt
 
-# Run the GA
-python -m genetic.main --help
-python -m genetic.main --pad 0 --generations 10 --seed 42
-python -m genetic.main --no-log         # smoke test, no run directory
+# Run the GA / save / play / resume
+python -m genetic.main --help                       # subcommand list
+python -m genetic.main run --pad 0 --generations 10 --seed 42
+python -m genetic.main save-best runs/2026-*-pad0 --name kraken
+python -m genetic.main play kraken
+python -m genetic.main resume runs/2026-*-pad0 --generations 3
 
 # Tests (uses stdlib unittest, discovered from ./tests/)
 ./unittests.sh                          # all tests, verbose (requires Rytm)
@@ -40,7 +42,8 @@ Three packages plus reference data:
   - `genome.py` — `apply_pad_config` splits canonical params into evolved-in-genome vs fixed-each-evaluation; `build_bounds`, `make_individual`, `bounded_mutate` are the DEAP-facing pieces.
   - `evaluate.py` — `make_evaluate` builds the fitness closure: decode genome → clone canonical params → apply evolved values + fixed values → send machine CC → send all param CCs → trigger note → block on voter.get_vote().
   - `pad_config.py` — **per-pad customization point**. For each pad, declares (a) which machines from `avail_machines_by_channel[pad]` are allowed, (b) which CCs to pin to fixed values, (c) per-CC bound overrides (e.g. centered caps for bipolar params). Pad 0 is configured for BD-kick search; other pads default to "evolve everything".
-  - `main.py` — driver. Argparse layer (`--pad`, `--midi-channel`, GA hyperparams, `--seed`, `--no-log`) → seed RNG → make `runs/` directory → DEAP toolbox → inline `mu+lambda` loop with HallOfFame elitism, replay-best callback, and per-vote/per-generation JSONL logging. `--midi-channel` defaults to `--pad`; override when Rytm MIDI routing reassigns pads to different channels.
+  - `main.py` — top-level dispatcher. Parses CLI (via `cli.py`), routes to `_run` / `_save_best` / `_play` / `_resume`. `_run` is the M2 GA driver: argparse → seed → make `runs/` directory → DEAP toolbox → inline `mu+lambda` loop with HallOfFame elitism, replay-best callback, and per-vote/per-generation JSONL logging. `--midi-channel` defaults to `--pad`.
+  - `patches.py` — patch I/O + DEAP individual conversion. `save()` / `load()`, `from_individual()` (build patch dict from decoded individual), `to_individual()` (decode patch back to individual + machine_idx lookup). Pure data; no MIDI or DEAP setup.
 
 - **`user_interface/voter.py`** — fitness input. `LPD8VoteController` listens for `note_on` 36–43 from an Akai LPD8 (must be on **Prog1**) and maps them to votes 1–8. `KeyboardVoteController` is the fallback. These are the fitness function for the GA.
 
