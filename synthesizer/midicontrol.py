@@ -1,10 +1,7 @@
 import mido
-from random import randint, seed
-from time import time
+from random import randint
 
 from synthesizer.parameters import ParameterCollection, Parameter, AnalogRytmParameterCSVReader
-
-seed(time())
 
 #inport = get_lpd8_port()
 
@@ -41,15 +38,15 @@ class MidiConnection():
 
 
     def __str__(self):
-        return outport.name
+        return self.outport_name
 
 class MidiMessage():
-    def __init__(self, midi_connect:MidiConnection, channel, msg:mido.Message = mido.Message('note_on', note=60)):
+    def __init__(self, midi_connect:MidiConnection, channel, msg:mido.Message = None):
         self.midi_connect = midi_connect
-        #self.msg = mido.Message('note_on', note=60)
         self.channel = channel
-        msg.channel = channel
-        self.msg = msg
+        if msg is None:
+            msg = mido.Message('note_on', note=60)
+        self.msg = msg.copy(channel=channel)
 
     def send(self):
         self.midi_connect.port.send(self.msg)
@@ -83,11 +80,10 @@ class MidiMessageCollectionSender():
         self.messages = []
 
     def convert_parameters_to_messages(self, collection: ParameterCollection):
+        self.messages = []
         for param in collection:
-            #print(param)   
             message = MidiCCMessage(self.midi_connect, self.channel, param)
             self.messages.append(message)
-            #print(message)
 
         
     def send_collection_messages(self):
@@ -125,26 +121,36 @@ class AnalogRytmMidiMessageCollectionSender(MidiMessageCollectionSender):
 
     def send_machine_selection(self, machine_num):
         machine_cc = 15
-        selection_param =  Parameter(machine_cc, machine_num, 0, self.machine_selector.get_num_machines())
-        selection_message = MidiMessage(self.midi_connect, self.channel, selection_param)
-        print(selection_message.msg)
-        #selection_message.send()
-        #print("send machine selection message to analog")
+        selection_param = Parameter(machine_cc, machine_num, 0, 127)
+        selection_message = MidiCCMessage(self.midi_connect, self.channel, selection_param)
+        selection_message.send()
 
 class AnalogRytmMachineSelector():
+    # Derived from kits_10.md (1-based human labels) with a -1 offset to
+    # 0-based MIDI machine values. kits_10's "0 - bd hard" entries on
+    # Channels 3-4 fall to -1 under that offset and are dropped, matching
+    # the convention used by the previous narrower table.
     avail_machines_by_channel = [
-            [0, 13, 21, 22, 26],
-            [0, 1, 2, 13, 14, 15, 16, 21, 22, 26, 28],
-            [0, 1, 2, 3, 4, 5, 13, 14, 15, 16, 21, 22, 26, 28],
-            [0, 1, 2, 3, 4, 5, 13, 14, 15, 16, 21, 22, 26, 28],
-            [7, 15, 16],
-            [8, 15, 16],
-            [8, 15, 16],
-            [8, 15, 16],
-            [9, 10, 15, 16, 17, 18, 24],
-            [9, 10, 15, 16, 17, 18, 24],
-            [11, 12, 16, 17, 19, 20, 25],
-            [11, 12, 16, 17, 19, 20, 25],
+            # Channel 0 (kits_10 Channel 1): bd/sd/ut/sy palette
+            [0, 1, 2, 13, 14, 15, 16, 21, 22, 23, 26, 27, 28, 29, 30, 31, 32],
+            # Channel 1 (kits_10 Channel 2): same as Channel 0
+            [0, 1, 2, 13, 14, 15, 16, 21, 22, 23, 26, 27, 28, 29, 30, 31, 32],
+            # Channel 2 (kits_10 Channel 3): + rs/cp
+            [0, 1, 2, 3, 4, 5, 13, 14, 15, 16, 21, 22, 23, 26, 27, 28, 29, 30, 31, 32],
+            # Channel 3 (kits_10 Channel 4): same as Channel 2
+            [0, 1, 2, 3, 4, 5, 13, 14, 15, 16, 21, 22, 23, 26, 27, 28, 29, 30, 31, 32],
+            # Channel 4 (kits_10 Channel 5): bt + ut + disable
+            [7, 15, 16, 26],
+            # Channels 5-7 (kits_10 Channels 6-8): xt + ut + disable
+            [8, 15, 16, 26],
+            [8, 15, 16, 26],
+            [8, 15, 16, 26],
+            # Channels 8-9 (kits_10 Channels 9-10): hi-hats palette
+            [9, 10, 15, 16, 17, 18, 24, 26, 32],
+            [9, 10, 15, 16, 17, 18, 24, 26, 32],
+            # Channels 10-11 (kits_10 Channels 11-12): cymbal/cowbell palette
+            [11, 12, 15, 16, 19, 20, 25, 26],
+            [11, 12, 15, 16, 19, 20, 25, 26],
         ]
 
     def __init__(self, channel:int=0, current_machine:int = 200):
