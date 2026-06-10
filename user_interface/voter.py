@@ -201,4 +201,6 @@ def vote(port):
         vote_result = keyboard_vote()
     return vote_result
 
-main()
+
+if __name__ == "__main__":
+    main()

@@ -6,7 +6,13 @@ from time import sleep
 from random import randint
 
 
-conn = MidiConnection('Elektron Analog Rytm MKII')
+conn = None
+
+
+def setUpModule():
+    global conn
+    conn = MidiConnection('Elektron Analog Rytm MKII')
+
 
 class TestMidiConnection(TestCase):
 
